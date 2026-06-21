@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Manajemen Stok Barang</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+      color: white;
+      padding: 25px 30px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .header h1 span {
+      font-size: 32px;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .header-actions button {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .header-actions button:hover {
+      background: rgba(255,255,255,0.25);
+      transform: translateY(-2px);
+    }
+    
+    /* Statistik */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      padding: 20px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .stat-card {
+      background: #f7fafc;
+      padding: 15px 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    
+    .stat-card .number {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2d3748;
+    }
+    
+    .stat-card .label {
+      font-size: 14px;
+      color: #718096;
+      margin-top: 5px;
+    }
+    
+    .stat-card.primary .number { color: #4299e1; }
+    .stat-card.success .number { color: #48bb78; }
+    .stat-card.danger .number { color: #fc8181; }
+    .stat-card.warning .number { color: #ed8936; }
+    
+    /* Content */
+    .content {
+      background: white;
+      border-radius: 0 0 12px 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    /* Form Input */
+    .form-section {
+      background: #f7fafc;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .form-section h2 {
+      font-size: 18px;
+      color: #2d3748;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      align-items: end;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 5px;
+    }
+    
+    .form-group label .required {
+      color: #fc8181;
+    }
+    
+    .form-group input,
+    .form-group select {
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+      background: white;
+      width: 100%;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #4299e1;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+    }
+    
+    .form-group input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    
+    .form-group input[type="number"]::-webkit-outer-spin-button,
+    .form-group input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    .btn-submit {
+      background: linear-gradient(135deg, #4299e1, #3182ce);
+      color: white;
+      padding: 10px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      min-width: 120px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+    }
+    
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-submit.success {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+    }
+    
+    .btn-submit.danger {
+      background: linear-gradient(135deg, #fc8181, #f56565);
+    }
+    
+    /* Search & Filter */
+    .toolbar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .toolbar input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 15px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .toolbar input:focus {
+      outline: none;
+      border-color: #4299e1;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+    }
+    
+    .toolbar .total {
+      color: #718096;
+      font-size: 14px;
+      white-space: nowrap;
+      background: #f7fafc;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+    
+    /* Table */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    
+    thead {
+      background: #f7fafc;
+    }
+    
+    th {
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #2d3748;
+      border-bottom: 2px solid #e2e8f0;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      background: #f7fafc;
+    }
+    
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #edf2f7;
+      vertical-align: middle;
+    }
+    
+    tr:hover {
+      background: #f7fafc;
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    .text-right {
+      text-align: right;
+    }
+    
+    .badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    
+    .badge-success {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+    
+    .badge-danger {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+    
+    .badge-warning {
+      background: #fefcbf;
+      color: #744210;
+    }
+    
+    .badge-info {
+      background: #bee3f8;
+      color: #2a4365;
+    }
+    
+    .stok-aman {
+      color: #48bb78;
+      font-weight: 700;
+    }
+    
+    .stok-menipis {
+      color: #ed8936;
+      font-weight: 700;
+    }
+    
+    .stok-habis {
+      color: #fc8181;
+      font-weight: 700;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-small {
+      padding: 5px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .btn-small:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn-edit {
+      background: #4299e1;
+      color: white;
+    }
+    
+    .btn-edit:hover {
+      background: #3182ce;
+    }
+    
+    .btn-delete {
+      background: #fc8181;
+      color: white;
+    }
+    
+    .btn-delete:hover {
+      background: #f56565;
+    }
+    
+    .btn-in {
+      background: #48bb78;
+      color: white;
+    }
+    
+    .btn-in:hover {
+      background: #38a169;
+    }
+    
+    .btn-out {
+      background: #ed8936;
+      color: white;
+    }
+    
+    .btn-out:hover {
+      background: #dd6b20;
+    }
+    
+    /* Loading */
+    .loading-row td {
+      text-align: center;
+      padding: 40px;
+      color: #718096;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #e2e8f0;
+      border-top: 3px solid #4299e1;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .empty-row td {
+      text-align: center;
+      padding: 40px;
+      color: #718096;
+      font-size: 16px;
+    }
+    
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 400px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .notification-success {
+      background: #48bb78;
+    }
+    
+    .notification-error {
+      background: #fc8181;
+    }
+    
+    .notification-info {
+      background: #4299e1;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+      }
+      
+      .header h1 {
+        font-size: 22px;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .btn-submit {
+        width: 100%;
+      }
+      
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .toolbar input {
+        min-width: auto;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .action-buttons .btn-small {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .content {
+        padding: 15px;
+      }
+      
+      .form-section {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>
+        <span>📦</span> Manajemen Stok Barang
+        <span id="connectionStatus" style="font-size:14px;font-weight:400;background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px;">⏳ Mengecek...</span>
+      </h1>
+      <div class="header-actions">
+        <button onclick="refreshData()">🔄 Refresh</button>
+        <button onclick="exportData()">📥 Export</button>
+        <button onclick="syncWithAPI()">🔗 Sync</button>
+      </div>
+    </div>
+    
+    <!-- Statistik -->
+    <div class="stats" id="statsContainer">
+      <div class="stat-card primary">
+        <div class="number" id="totalBarang">0</div>
+        <div class="label">Total Barang</div>
+      </div>
+      <div class="stat-card success">
+        <div class="number" id="totalStok">0</div>
+        <div class="label">Total Stok</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="number" id="stokMenipis">0</div>
+        <div class="label">Stok Menipis (&lt; 10)</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="number" id="stokHabis">0</div>
+        <div class="label">Stok Habis</div>
+      </div>
+    </div>
+    
+    <!-- Content -->
+    <div class="content">
+      <!-- Form Input -->
+      <div class="form-section">
+        <h2>➕ Input Stok Barang</h2>
+        <form id="stokForm" onsubmit="saveData(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nama Barang <span class="required">*</span></label>
+              <input type="text" id="field-namaBarang" placeholder="Masukkan nama barang" required>
+            </div>
+            <div class="form-group">
+              <label>Jumlah Masuk</label>
+              <input type="number" id="field-jumlahMasuk" placeholder="0" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label>Jumlah Keluar</label>
+              <input type="number" id="field-jumlahKeluar" placeholder="0" min="0" value="0">
+            </div>
+            <div class="form-group" style="justify-content:flex-end;">
+              <button type="submit" class="btn-submit" id="btnSubmit">
+                <span>💾</span> Simpan
+              </button>
+            </div>
+          </div>
+          <input type="hidden" id="field-editingId" value="">
+        </form>
+      </div>
+      
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <input type="text" id="searchBarang" placeholder="🔍 Cari barang..." onkeyup="filterTable(this.value)">
+        <span class="total" id="totalData">Total: 0 data</span>
+      </div>
+      
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:50px;">#</th>
+              <th style="min-width:150px;">Nama Barang</th>
+              <th style="min-width:100px;text-align:right;">Jumlah Masuk</th>
+              <th style="min-width:100px;text-align:right;">Jumlah Keluar</th>
+              <th style="min-width:100px;text-align:right;">Sisa Stok</th>
+              <th style="min-width:100px;">Status</th>
+              <th style="min-width:180px;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyStok">
+            <tr class="loading-row"><td colspan="7"><div class="spinner"></div><br>Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // ==================== KONFIGURASI ====================
+    // Ganti dengan URL API Anda
+    const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbzM2HOB0Q1-u8Y_8TYVfesus2l1rubCrJAvyDU_odSYJGC_SRWIOtbUULCaMa10mLKZug/exec';
+    
+    // ==================== STATE ====================
+    let allData = [];
+    let isSaving = false;
+    let editingId = null;
+    let isConnected = false;
+    let useAPI = true;
+    
+    // ==================== FUNGSI API ====================
+    async function callAPI(action, data = null, id = null) {
+      try {
+        let url = `${API_BASE_URL}?action=${action}`;
+        
+        if (id !== null && id !== undefined) {
+          url += `&id=${id}`;
+        }
+        
+        const options = {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        };
+        
+        if (data) {
+          options.body = JSON.stringify(data);
+        }
+        
+        const response = await fetch(url, options);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+      }
+    }
+    
+    // ==================== CEK KONEKSI ====================
+    async function checkConnection() {
+      const statusEl = document.getElementById('connectionStatus');
+      statusEl.textContent = '⏳ Mengecek...';
+      statusEl.style.background = 'rgba(255,255,255,0.15)';
+      
+      try {
+        const result = await callAPI('get');
+        
+        if (result && result.status === 'success') {
+          isConnected = true;
+          useAPI = true;
+          statusEl.textContent = '✅ Online';
+          statusEl.style.background = 'rgba(72, 187, 120, 0.3)';
+          showNotification('✅ Terhubung ke server!', 'success');
+          await loadData();
+        } else {
+          throw new Error('Invalid response');
+        }
+      } catch (error) {
+        isConnected = false;
+        useAPI = false;
+        statusEl.textContent = '❌ Offline';
+        statusEl.style.background = 'rgba(252, 129, 129, 0.3)';
+        showNotification('⚠️ Offline - Menggunakan data lokal', 'error');
+        
+        // Load data lokal
+        loadLocalData();
+      }
+    }
+    
+    // ==================== LOAD DATA ====================
+    async function loadData() {
+      const tbody = document.getElementById('tbodyStok');
+      tbody.innerHTML = '<tr class="loading-row"><td colspan="7"><div class="spinner"></div><br>Memuat data...</td></tr>';
+      
+      if (useAPI && isConnected) {
+        try {
+          const result = await callAPI('get');
+          
+          if (result && result.status === 'success' && result.data) {
+            allData = result.data;
+            renderTable(allData);
+            updateStats(allData);
+            return;
+          }
+        } catch (error) {
+          console.error('Error loading data:', error);
+          showNotification('Gagal memuat data dari server', 'error');
+        }
+      }
+      
+      // Fallback ke data lokal
+      loadLocalData();
+    }
+    
+    // ==================== LOAD LOCAL DATA ====================
+    function loadLocalData() {
+      const saved = localStorage.getItem('stokBarangData');
+      if (saved) {
+        try {
+          allData = JSON.parse(saved);
+        } catch {
+          allData = [];
+        }
+      } else {
+        // Data dummy
+        allData = [
+          { id: 1, namaBarang: 'Beras Premium 5kg', jumlahMasuk: 100, jumlahKeluar: 45 },
+          { id: 2, namaBarang: 'Minyak Goreng 2L', jumlahMasuk: 80, jumlahKeluar: 30 },
+          { id: 3, namaBarang: 'Gula Pasir 1kg', jumlahMasuk: 120, jumlahKeluar: 90 },
+          { id: 4, namaBarang: 'Telur Ayam 1kg', jumlahMasuk: 50, jumlahKeluar: 48 },
+          { id: 5, namaBarang: 'Tepung Terigu 1kg', jumlahMasuk: 60, jumlahKeluar: 25 }
+        ];
+      }
+      
+      renderTable(allData);
+      updateStats(allData);
+    }
+    
+    // ==================== RENDER TABLE ====================
+    function renderTable(data) {
+      const tbody = document.getElementById('tbodyStok');
+      const totalEl = document.getElementById('totalData');
+      
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">📭 Belum ada data stok</td></tr>';
+        if (totalEl) totalEl.textContent = 'Total: 0 data';
+        return;
+      }
+      
+      let html = '';
+      data.forEach((item, index) => {
+        const stok = (item.jumlahMasuk || 0) - (item.jumlahKeluar || 0);
+        let statusClass, statusText;
+        
+        if (stok <= 0) {
+          statusClass = 'badge-danger';
+          statusText = '⚠️ Habis';
+        } else if (stok <= 10) {
+          statusClass = 'badge-warning';
+          statusText = '⚠️ Menipis';
+        } else {
+          statusClass = 'badge-success';
+          statusText = '✅ Aman';
+        }
+        
+        const rowNum = index + 1;
+        html += `
+          <tr>
+            <td>${rowNum}</td>
+            <td><strong>${item.namaBarang || '-'}</strong></td>
+            <td class="text-right">${(item.jumlahMasuk || 0).toLocaleString()}</td>
+            <td class="text-right">${(item.jumlahKeluar || 0).toLocaleString()}</td>
+            <td class="text-right ${stok <= 0 ? 'stok-habis' : stok <= 10 ? 'stok-menipis' : 'stok-aman'}">
+              <strong>${stok.toLocaleString()}</strong>
+            </td>
+            <td><span class="badge ${statusClass}">${statusText}</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-small btn-edit" onclick="editData(${item.id || index})" title="Edit">✏️</button>
+                <button class="btn-small btn-in" onclick="tambahMasuk(${item.id || index})" title="Tambah Masuk">📥</button>
+                <button class="btn-small btn-out" onclick="tambahKeluar(${item.id || index})" title="Tambah Keluar">📤</button>
+                <button class="btn-small btn-delete" onclick="deleteData(${item.id || index})" title="Hapus">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+      
+      tbody.innerHTML = html;
+      if (totalEl) totalEl.textContent = `Total: ${data.length} data`;
+    }
+    
+    // ==================== UPDATE STATISTIK ====================
+    function updateStats(data) {
+      if (!data) data = allData;
+      
+      const totalBarang = data.length;
+      let totalStok = 0;
+      let stokMenipis = 0;
+      let stokHabis = 0;
+      
+      data.forEach(item => {
+        const stok = (item.jumlahMasuk || 0) - (item.jumlahKeluar || 0);
+        totalStok += stok;
+        if (stok <= 0) stokHabis++;
+        else if (stok <= 10) stokMenipis++;
+      });
+      
+      document.getElementById('totalBarang').textContent = totalBarang;
+      document.getElementById('totalStok').textContent = totalStok.toLocaleString();
+      document.getElementById('stokMenipis').textContent = stokMenipis;
+      document.getElementById('stokHabis').textContent = stokHabis;
+    }
+    
+    // ==================== SAVE DATA ====================
+    async function saveData(event) {
+      event.preventDefault();
+      
+      if (isSaving) return;
+      isSaving = true;
+      
+      const btnSubmit = document.getElementById('btnSubmit');
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span>⏳</span> Menyimpan...';
+      
+      const namaBarang = document.getElementById('field-namaBarang').value.trim();
+      const jumlahMasuk = parseInt(document.getElementById('field-jumlahMasuk').value) || 0;
+      const jumlahKeluar = parseInt(document.getElementById('field-jumlahKeluar').value) || 0;
+      const editingId = document.getElementById('field-editingId').value;
+      
+      if (!namaBarang) {
+        showNotification('Nama barang harus diisi!', 'error');
+        resetForm();
+        return;
+      }
+      
+      const data = {
+        namaBarang: namaBarang,
+        jumlahMasuk: jumlahMasuk,
+        jumlahKeluar: jumlahKeluar
+      };
+      
+      try {
+        if (useAPI && isConnected) {
+          const action = editingId ? 'update' : 'add';
+          const result = await callAPI(action, data, editingId || null);
+          
+          if (result && result.status === 'success') {
+            showNotification(`Data berhasil ${editingId ? 'diupdate' : 'ditambahkan'}!`, 'success');
+            resetForm();
+            await loadData();
+          } else {
+            throw new Error(result?.message || 'Gagal menyimpan data');
+          }
+        } else {
+          // Simpan lokal
+          if (editingId) {
+            const index = allData.findIndex(item => item.id == editingId);
+            if (index !== -1) {
+              allData[index] = { ...allData[index], ...data };
+              showNotification('Data berhasil diupdate!', 'success');
+            }
+          } else {
+            const newId = allData.length > 0 ? Math.max(...allData.map(d => d.id || 0)) + 1 : 1;
+            allData.push({ id: newId, ...data });
+            showNotification('Data berhasil ditambahkan!', 'success');
+          }
+          
+          localStorage.setItem('stokBarangData', JSON.stringify(allData));
+          resetForm();
+          renderTable(allData);
+          updateStats(allData);
+        }
+      } catch (error) {
+        showNotification('Error: ' + error.message, 'error');
+      } finally {
+        isSaving = false;
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '<span>💾</span> Simpan';
+      }
+    }
+    
+    // ==================== EDIT DATA ====================
+    async function editData(id) {
+      let item = null;
+      
+      if (useAPI && isConnected) {
+        try {
+          const result = await callAPI('get', null, id);
+          if (result && result.status === 'success' && result.data) {
+            item = result.data;
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      }
+      
+      if (!item) {
+        // Cari di data lokal
+        item = allData.find(d => d.id == id);
+      }
+      
+      if (item) {
+        document.getElementById('field-namaBarang').value = item.namaBarang || '';
+        document.getElementById('field-jumlahMasuk').value = item.jumlahMasuk || 0;
+        document.getElementById('field-jumlahKeluar').value = item.jumlahKeluar || 0;
+        document.getElementById('field-editingId').value = item.id;
+        document.getElementById('btnSubmit').innerHTML = '<span>✏️</span> Update';
+        document.getElementById('btnSubmit').classList.add('success');
+        
+        // Scroll ke form
+        document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        showNotification('Data tidak ditemukan!', 'error');
+      }
+    }
+    
+    // ==================== TAMBAH MASUK ====================
+    async function tambahMasuk(id) {
+      const jumlah = prompt('Masukkan jumlah barang masuk:');
+      if (jumlah === null) return;
+      
+      const jml = parseInt(jumlah);
+      if (isNaN(jml) || jml <= 0) {
+        showNotification('Jumlah harus angka positif!', 'error');
+        return;
+      }
+      
+      let item = allData.find(d => d.id == id);
+      if (!item) {
+        showNotification('Data tidak ditemukan!', 'error');
+        return;
+      }
+      
+      const dataUpdate = {
+        namaBarang: item.namaBarang,
+        jumlahMasuk: (item.jumlahMasuk || 0) + jml,
+        jumlahKeluar: item.jumlahKeluar || 0
+      };
+      
+      await updateDataById(id, dataUpdate);
+    }
+    
+    // ==================== TAMBAH KELUAR ====================
+    async function tambahKeluar(id) {
+      const jumlah = prompt('Masukkan jumlah barang keluar:');
+      if (jumlah === null) return;
+      
+      const jml = parseInt(jumlah);
+      if (isNaN(jml) || jml <= 0) {
+        showNotification('Jumlah harus angka positif!', 'error');
+        return;
+      }
+      
+      let item = allData.find(d => d.id == id);
+      if (!item) {
+        showNotification('Data tidak ditemukan!', 'error');
+        return;
+      }
+      
+      const stokSekarang = (item.jumlahMasuk || 0) - (item.jumlahKeluar || 0);
+      if (jml > stokSekarang) {
+        showNotification(`Stok tidak mencukupi! Sisa stok: ${stokSekarang}`, 'error');
+        return;
+      }
+      
+      const dataUpdate = {
+        namaBarang: item.namaBarang,
+        jumlahMasuk: item.jumlahMasuk || 0,
+        jumlahKeluar: (item.jumlahKeluar || 0) + jml
+      };
+      
+      await updateDataById(id, dataUpdate);
+    }
+    
+    // ==================== UPDATE DATA BY ID ====================
+    async function updateDataById(id, data) {
+      try {
+        if (useAPI && isConnected) {
+          const result = await callAPI('update', data, id);
+          if (result && result.status === 'success') {
+            showNotification('Stok berhasil diupdate!', 'success');
+            await loadData();
+            return;
+          }
+        }
+        
+        // Update lokal
+        const index = allData.findIndex(d => d.id == id);
+        if (index !== -1) {
+          allData[index] = { ...allData[index], ...data };
+          localStorage.setItem('stokBarangData', JSON.stringify(allData));
+          renderTable(allData);
+          updateStats(allData);
+          showNotification('Stok berhasil diupdate!', 'success');
+        }
+      } catch (error) {
+        showNotification('Error: ' + error.message, 'error');
+      }
+    }
+    
+    // ==================== DELETE DATA ====================
+    async function deleteData(id) {
+      if (!confirm('Yakin ingin menghapus data ini?')) return;
+      
+      try {
+        if (useAPI && isConnected) {
+          const result = await callAPI('delete', null, id);
+          if (result && result.status === 'success') {
+            showNotification('Data berhasil dihapus!', 'success');
+            await loadData();
+            return;
+          }
+        }
+        
+        // Hapus lokal
+        const index = allData.findIndex(d => d.id == id);
+        if (index !== -1) {
+          allData.splice(index, 1);
+          localStorage.setItem('stokBarangData', JSON.stringify(allData));
+          renderTable(allData);
+          updateStats(allData);
+          showNotification('Data berhasil dihapus!', 'success');
+        }
+      } catch (error) {
+        showNotification('Error: ' + error.message, 'error');
+      }
+    }
+    
+    // ==================== RESET FORM ====================
+    function resetForm() {
+      document.getElementById('field-namaBarang').value = '';
+      document.getElementById('field-jumlahMasuk').value = '0';
+      document.getElementById('field-jumlahKeluar').value = '0';
+      document.getElementById('field-editingId').value = '';
+      document.getElementById('btnSubmit').innerHTML = '<span>💾</span> Simpan';
+      document.getElementById('btnSubmit').classList.remove('success', 'danger');
+    }
+    
+    // ==================== FILTER TABLE ====================
+    function filterTable(query) {
+      const q = query.toLowerCase().trim();
+      const rows = document.querySelectorAll('#tbodyStok tr');
+      
+      let visibleCount = 0;
+      rows.forEach(row => {
+        if (row.classList.contains('loading-row') || row.classList.contains('empty-row')) {
+          row.style.display = '';
+          return;
+        }
+        const text = row.textContent.toLowerCase();
+        const isVisible = text.includes(q);
+        row.style.display = isVisible ? '' : 'none';
+        if (isVisible) visibleCount++;
+      });
+      
+      const totalEl = document.getElementById('totalData');
+      if (totalEl) {
+        if (q) {
+          totalEl.textContent = `Menampilkan ${visibleCount} dari ${allData.length} data`;
+        } else {
+          totalEl.textContent = `Total: ${allData.length} data`;
+        }
+      }
+    }
+    
+    // ==================== REFRESH DATA ====================
+    async function refreshData() {
+      showNotification('🔄 Memuat ulang data...', 'info');
+      await loadData();
+    }
+    
+    // ==================== SYNC WITH API ====================
+    async function syncWithAPI() {
+      showNotification('🔄 Sinkronisasi...', 'info');
+      await checkConnection();
+    }
+    
+    // ==================== EXPORT DATA ====================
+    function exportData() {
+      if (!allData || allData.length === 0) {
+        showNotification('Tidak ada data untuk diexport!', 'error');
+        return;
+      }
+      
+      try {
+        const json = JSON.stringify(allData, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `stok_barang_${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showNotification('Data berhasil diexport!', 'success');
+      } catch (error) {
+        showNotification('Gagal export: ' + error.message, 'error');
+      }
+    }
+    
+    // ==================== NOTIFICATION ====================
+    function showNotification(message, type = 'info') {
+      const existing = document.querySelector('.notification');
+      if (existing) existing.remove();
+      
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        notification.style.transition = 'all 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+    
+    // ==================== INIT ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Coba koneksi ke API
+      checkConnection();
+      
+      // Reset form saat klik batal (esc)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          resetForm();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
