@@ -20,7 +20,7 @@
     }
     
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
     }
     
@@ -186,6 +186,12 @@
       margin: 0;
     }
     
+    .form-group .info-text {
+      font-size: 12px;
+      color: #718096;
+      margin-top: 4px;
+    }
+    
     .btn-submit {
       background: linear-gradient(135deg, #4299e1, #3182ce);
       color: white;
@@ -284,6 +290,7 @@
       position: sticky;
       top: 0;
       background: #f7fafc;
+      z-index: 10;
     }
     
     td {
@@ -475,6 +482,16 @@
     }
     
     /* Responsive */
+    @media (max-width: 992px) {
+      .table-wrapper {
+        font-size: 13px;
+      }
+      
+      th, td {
+        padding: 8px 10px;
+      }
+    }
+    
     @media (max-width: 768px) {
       .header {
         flex-direction: column;
@@ -596,6 +613,18 @@
               </button>
             </div>
           </div>
+          <div class="form-grid" style="margin-top:10px;">
+            <div class="form-group">
+              <label>Tanggal Update</label>
+              <input type="datetime-local" id="field-tanggalUpdate">
+              <span class="info-text">Kosongkan untuk menggunakan waktu sekarang</span>
+            </div>
+            <div class="form-group">
+              <label>Sisa Stok (Otomatis)</label>
+              <input type="text" id="field-sisaStok" readonly style="background:#f7fafc;cursor:not-allowed;" value="0">
+              <span class="info-text">Sisa stok = Masuk - Keluar</span>
+            </div>
+          </div>
           <input type="hidden" id="field-editingId" value="">
         </form>
       </div>
@@ -615,13 +644,14 @@
               <th style="min-width:150px;">Nama Barang</th>
               <th style="min-width:100px;text-align:right;">Jumlah Masuk</th>
               <th style="min-width:100px;text-align:right;">Jumlah Keluar</th>
-              <th style="min-width:100px;text-align:right;">Sisa Stok</th>
+              <th style="min-width:110px;text-align:right;">Sisa Stok</th>
               <th style="min-width:100px;">Status</th>
+              <th style="min-width:170px;">Tanggal Update</th>
               <th style="min-width:180px;">Aksi</th>
             </tr>
           </thead>
           <tbody id="tbodyStok">
-            <tr class="loading-row"><td colspan="7"><div class="spinner"></div><br>Memuat data...</td></tr>
+            <tr class="loading-row"><td colspan="8"><div class="spinner"></div><br>Memuat data...</td></tr>
           </tbody>
         </table>
       </div>
@@ -631,7 +661,7 @@
   <script>
     // ==================== KONFIGURASI ====================
     // Ganti dengan URL API Anda
-    const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbzM2HOB0Q1-u8Y_8TYVfesus2l1rubCrJAvyDU_odSYJGC_SRWIOtbUULCaMa10mLKZug/exec';
+    const API_BASE_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
     
     // ==================== STATE ====================
     let allData = [];
@@ -708,7 +738,7 @@
     // ==================== LOAD DATA ====================
     async function loadData() {
       const tbody = document.getElementById('tbodyStok');
-      tbody.innerHTML = '<tr class="loading-row"><td colspan="7"><div class="spinner"></div><br>Memuat data...</td></tr>';
+      tbody.innerHTML = '<tr class="loading-row"><td colspan="8"><div class="spinner"></div><br>Memuat data...</td></tr>';
       
       if (useAPI && isConnected) {
         try {
@@ -740,13 +770,21 @@
           allData = [];
         }
       } else {
-        // Data dummy
+        // Data dummy dengan tanggal update
+        const now = new Date().toLocaleString('id-ID', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
         allData = [
-          { id: 1, namaBarang: 'Beras Premium 5kg', jumlahMasuk: 100, jumlahKeluar: 45 },
-          { id: 2, namaBarang: 'Minyak Goreng 2L', jumlahMasuk: 80, jumlahKeluar: 30 },
-          { id: 3, namaBarang: 'Gula Pasir 1kg', jumlahMasuk: 120, jumlahKeluar: 90 },
-          { id: 4, namaBarang: 'Telur Ayam 1kg', jumlahMasuk: 50, jumlahKeluar: 48 },
-          { id: 5, namaBarang: 'Tepung Terigu 1kg', jumlahMasuk: 60, jumlahKeluar: 25 }
+          { id: 1, namaBarang: 'Beras Premium 5kg', jumlahMasuk: 100, jumlahKeluar: 45, tanggalUpdate: now },
+          { id: 2, namaBarang: 'Minyak Goreng 2L', jumlahMasuk: 80, jumlahKeluar: 30, tanggalUpdate: now },
+          { id: 3, namaBarang: 'Gula Pasir 1kg', jumlahMasuk: 120, jumlahKeluar: 90, tanggalUpdate: now },
+          { id: 4, namaBarang: 'Telur Ayam 1kg', jumlahMasuk: 50, jumlahKeluar: 48, tanggalUpdate: now },
+          { id: 5, namaBarang: 'Tepung Terigu 1kg', jumlahMasuk: 60, jumlahKeluar: 25, tanggalUpdate: now }
         ];
       }
       
@@ -760,7 +798,7 @@
       const totalEl = document.getElementById('totalData');
       
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">📭 Belum ada data stok</td></tr>';
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="8">📭 Belum ada data stok</td></tr>';
         if (totalEl) totalEl.textContent = 'Total: 0 data';
         return;
       }
@@ -782,6 +820,8 @@
         }
         
         const rowNum = index + 1;
+        const tanggal = item.tanggalUpdate || item.tanggal || '-';
+        
         html += `
           <tr>
             <td>${rowNum}</td>
@@ -792,6 +832,7 @@
               <strong>${stok.toLocaleString()}</strong>
             </td>
             <td><span class="badge ${statusClass}">${statusText}</span></td>
+            <td style="font-size:12px;color:#4a5568;">${tanggal}</td>
             <td>
               <div class="action-buttons">
                 <button class="btn-small btn-edit" onclick="editData(${item.id || index})" title="Edit">✏️</button>
@@ -830,6 +871,14 @@
       document.getElementById('stokHabis').textContent = stokHabis;
     }
     
+    // ==================== HITUNG SISA STOK ====================
+    function hitungSisaStok() {
+      const masuk = parseInt(document.getElementById('field-jumlahMasuk').value) || 0;
+      const keluar = parseInt(document.getElementById('field-jumlahKeluar').value) || 0;
+      const sisa = masuk - keluar;
+      document.getElementById('field-sisaStok').value = sisa >= 0 ? sisa : 0;
+    }
+    
     // ==================== SAVE DATA ====================
     async function saveData(event) {
       event.preventDefault();
@@ -844,6 +893,7 @@
       const namaBarang = document.getElementById('field-namaBarang').value.trim();
       const jumlahMasuk = parseInt(document.getElementById('field-jumlahMasuk').value) || 0;
       const jumlahKeluar = parseInt(document.getElementById('field-jumlahKeluar').value) || 0;
+      const tanggalUpdate = document.getElementById('field-tanggalUpdate').value;
       const editingId = document.getElementById('field-editingId').value;
       
       if (!namaBarang) {
@@ -852,10 +902,25 @@
         return;
       }
       
+      // Format tanggal
+      let tanggal = tanggalUpdate;
+      if (!tanggal) {
+        const now = new Date();
+        tanggal = now.toLocaleString('id-ID', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+      
       const data = {
         namaBarang: namaBarang,
         jumlahMasuk: jumlahMasuk,
-        jumlahKeluar: jumlahKeluar
+        jumlahKeluar: jumlahKeluar,
+        tanggalUpdate: tanggal,
+        sisaStok: jumlahMasuk - jumlahKeluar
       };
       
       try {
@@ -923,6 +988,11 @@
         document.getElementById('field-jumlahMasuk').value = item.jumlahMasuk || 0;
         document.getElementById('field-jumlahKeluar').value = item.jumlahKeluar || 0;
         document.getElementById('field-editingId').value = item.id;
+        document.getElementById('field-tanggalUpdate').value = item.tanggalUpdateRaw || '';
+        
+        // Hitung sisa stok
+        hitungSisaStok();
+        
         document.getElementById('btnSubmit').innerHTML = '<span>✏️</span> Update';
         document.getElementById('btnSubmit').classList.add('success');
         
@@ -950,10 +1020,19 @@
         return;
       }
       
+      const now = new Date().toLocaleString('id-ID', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
       const dataUpdate = {
         namaBarang: item.namaBarang,
         jumlahMasuk: (item.jumlahMasuk || 0) + jml,
-        jumlahKeluar: item.jumlahKeluar || 0
+        jumlahKeluar: item.jumlahKeluar || 0,
+        tanggalUpdate: now
       };
       
       await updateDataById(id, dataUpdate);
@@ -982,10 +1061,19 @@
         return;
       }
       
+      const now = new Date().toLocaleString('id-ID', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
       const dataUpdate = {
         namaBarang: item.namaBarang,
         jumlahMasuk: item.jumlahMasuk || 0,
-        jumlahKeluar: (item.jumlahKeluar || 0) + jml
+        jumlahKeluar: (item.jumlahKeluar || 0) + jml,
+        tanggalUpdate: now
       };
       
       await updateDataById(id, dataUpdate);
@@ -1051,6 +1139,8 @@
       document.getElementById('field-jumlahMasuk').value = '0';
       document.getElementById('field-jumlahKeluar').value = '0';
       document.getElementById('field-editingId').value = '';
+      document.getElementById('field-tanggalUpdate').value = '';
+      document.getElementById('field-sisaStok').value = '0';
       document.getElementById('btnSubmit').innerHTML = '<span>💾</span> Simpan';
       document.getElementById('btnSubmit').classList.remove('success', 'danger');
     }
@@ -1138,6 +1228,10 @@
     
     // ==================== INIT ====================
     document.addEventListener('DOMContentLoaded', () => {
+      // Event listener untuk hitung sisa stok otomatis
+      document.getElementById('field-jumlahMasuk').addEventListener('input', hitungSisaStok);
+      document.getElementById('field-jumlahKeluar').addEventListener('input', hitungSisaStok);
+      
       // Coba koneksi ke API
       checkConnection();
       
